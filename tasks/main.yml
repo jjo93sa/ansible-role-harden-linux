@@ -3,6 +3,7 @@
     path: /root/.pw
     state: absent
 
+
 - name: Update APT package cache
   apt:
     update_cache: true
@@ -35,6 +36,16 @@
   delay: 5
   tags:
     - ufw
+
+- include_role:
+    name: ansible-role-iptables
+
+- name: Drop all ipv6 traffic
+  iptables:
+    ip_version: ipv6
+    chain: "{{ item }}"
+    policy: DROP
+  with_items: [ 'INPUT', 'FORWARD', 'OUTPUT' ]
 
 - name: Install openntpd/ntp package if requested
   apt:
@@ -140,56 +151,6 @@
   tags:
     - sysctl
 
-- name: Combine harden_linux_ufw_defaults and harden_linux_ufw_defaults_user (if defined)
-  set_fact:
-    harden_linux_ufw_defaults: "{{ harden_linux_ufw_defaults | combine(harden_linux_ufw_defaults_user|default({})) }}"
-  tags:
-    - ufw
-
-- name: UFW - Configure defaults
-  lineinfile:
-    dest: /etc/default/ufw
-    regexp: "{{ item }}"
-    line: "{{ harden_linux_ufw_defaults[item] }}"
-    state: present
-  notify: "reload ufw"
-  with_items:
-    - "{{ harden_linux_ufw_defaults | list }}"
-  tags:
-    - ufw
-
-- name: UFW - Apply firewall rules
-  ufw:
-    rule: "{{ item.rule }}"
-    interface: "{{ item.interface | default('') }}"
-    direction: "{{ item.direction | default('in') }}"
-    from_ip: "{{ item.from_ip | default('any') }}"
-    to_ip: "{{ item.to_ip | default('any') }}"
-    from_port: "{{ item.from_port | default('') }}"
-    to_port: "{{ item.to_port | default('') }}"
-    protocol: "{{ item.protocol | default('any') }}"
-    log: "{{ item.log | default(False) }}"
-  with_items: "{{ harden_linux_ufw_rules }}"
-  tags:
-    - ufw
-    - ufwrules
-
-- name: UFW - Allow configured networks to communicate
-  ufw:
-    rule: allow
-    src: "{{ item }}"
-  with_items:
-    - "{{ harden_linux_ufw_allow_networks }}"
-  when: harden_linux_ufw_allow_networks is defined
-  tags:
-    - ufw
-
-- name: UFW - Setup logging
-  ufw:
-    logging: "{{ harden_linux_ufw_logging }}"
-  tags:
-    - ufw
-
 - name: Update Sshguard white list
   lineinfile:
     dest: /etc/sshguard/whitelist
@@ -200,12 +161,6 @@
     - "{{ harden_linux_sshguard_whitelist }}"
   tags:
     - sshguard
-
-- name: UFW - Enable firewall/iptables
-  ufw:
-    state: enabled
-  tags:
-    - ufw
 
 - name: Change root password
   user:

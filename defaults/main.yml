@@ -5,10 +5,10 @@ harden_linux_deploy_user_shell: "/bin/bash"
 
 # Packages required by this role
 harden_linux_required_packages:
-  - ufw
   - sshguard
   - unattended-upgrades
   - sudo
+  - iptables-persistent
 
 # NTP packages to install. By default "openntpd" is used. You can als use "ntp"
 # package. But "openntpd" has the advantage that it doesn't listen on any ports
@@ -104,30 +104,11 @@ harden_linux_sshd_settings:
   "^PermitTunnel": "PermitTunnel no"                      # Disable tun(4) device forwarding
   "^Port ": "Port 22"                                     # Set SSHd port
 
-# By default we only allow SSH inbound traffic.
-harden_linux_ufw_rules:
-  - rule: "allow"
-    to_port: "22"
-    protocol: "tcp"
-
-# Defaults for UFW (/etc/default/ufw). Same rules as for
-# harden_linux_sshd_settings applies.
-harden_linux_ufw_defaults:
-  "^IPV6": 'IPV6=yes'
-  "^DEFAULT_INPUT_POLICY": 'DEFAULT_INPUT_POLICY="DROP"'
-  "^DEFAULT_OUTPUT_POLICY": 'DEFAULT_OUTPUT_POLICY="ACCEPT"'
-  "^DEFAULT_FORWARD_POLICY": 'DEFAULT_FORWARD_POLICY="DROP"'
-  "^DEFAULT_APPLICATION_POLICY": 'DEFAULT_APPLICATION_POLICY="SKIP"'
-  "^MANAGE_BUILTINS": 'MANAGE_BUILTINS=no'
-  "^IPT_SYSCTL": 'IPT_SYSCTL=/etc/ufw/sysctl.conf'
-  "^IPT_MODULES": 'IPT_MODULES="nf_conntrack_ftp nf_nat_ftp nf_conntrack_netbios_ns"'
-
-# Disable/enable UFW logging
-harden_linux_ufw_logging: 'off'
-
 # SSHGuard whitelist. SSHGuard blocks IPs for some time if
 # to many login attempts fail. Specify IP (ranges) that
 # should not be blocked
 harden_linux_sshguard_whitelist:
+  - "91.135.14.17"
+  - "103.105.48.125"
   - "127.0.0.0/8"
   - "::1/128"
