@@ -37,7 +37,7 @@
   tags:
     - ufw
 
-- include_role:
+- import_role:
     name: ansible-role-iptables
 
 - name: Drop all ipv6 traffic
