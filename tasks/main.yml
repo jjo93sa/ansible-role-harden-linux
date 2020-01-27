@@ -7,16 +7,7 @@
 - name: Update APT package cache
   apt:
     update_cache: true
-    cache_valid_time: 3600
-  retries: 2
-  delay: 5
-  tags:
-    - apt
-
-- name: Install aptitude
-  apt:
-    pkg: aptitude
-    state: present
+    cache_valid_time: 0
   retries: 2
   delay: 5
   tags:
