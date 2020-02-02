@@ -22,7 +22,7 @@
 - name: Install required packages
   apt:
     state: present
-    pkg: "{{ harden_linux_required_packages }}"
+    pkg: "{{ harden_linux_required_packages + harden_linux_required_packages_user | default([])  }}"
   retries: 2
   delay: 5
   tags:
