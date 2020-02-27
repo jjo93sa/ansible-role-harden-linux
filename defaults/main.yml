@@ -9,6 +9,7 @@ harden_linux_required_packages:
   - unattended-upgrades
   - sudo
   - iptables-persistent
+  - python3-pip
 
 # NTP packages to install. By default "openntpd" is used. You can als use "ntp"
 # package. But "openntpd" has the advantage that it doesn't listen on any ports
