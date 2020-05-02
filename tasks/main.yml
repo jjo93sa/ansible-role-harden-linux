@@ -2,6 +2,7 @@
   file:
     path: /root/.pw
     state: absent
+  tags: [ harden, always ]
 
 
 - name: Update APT package cache
@@ -10,14 +11,14 @@
     cache_valid_time: 0
   retries: 2
   delay: 5
-  tags:
-    - apt
+  tags: [ harden, apt, always ]
 
 - name: Upgrade APT to the latest packages
   apt:
     upgrade: safe
   retries: 2
   delay: 5
+  tags: [ harden, apt, always ]
 
 - name: Install required packages
   apt:
@@ -25,11 +26,11 @@
     pkg: "{{ harden_linux_required_packages + harden_linux_required_packages_user | default([])  }}"
   retries: 2
   delay: 5
-  tags:
-    - ufw
+  tags: [ harden, apt, always ]
 
 - import_role:
     name: ansible-role-iptables
+  tags: [ harden, iptables, always ]
 
 - name: Drop all ipv6 traffic
   iptables:
@@ -37,6 +38,7 @@
     chain: "{{ item }}"
     policy: DROP
   with_items: [ 'INPUT', 'FORWARD', 'OUTPUT' ]
+  tags: [ harden, iptables, always ]
 
 - name: Install openntpd/ntp package if requested
   apt:
@@ -45,15 +47,13 @@
   retries: 2
   delay: 5
   when: harden_linux_ntp is defined
-  tags:
-    - ntpd
+  tags: [ harden, ntpd, never ]
 
 - name: Set NTP config directory (depends on selected NTP package)
   set_fact:
     harden_linux_ntp_config_directory: '{% if harden_linux_ntp == "openntpd" %}openntpd/{% else %}{% endif %}'
   when: harden_linux_ntp is defined
-  tags:
-    - ntpd
+  tags: [ harden, ntpd, never ]
 
 - name: Add ntpd.conf if requested
   lineinfile:
@@ -65,8 +65,7 @@
   when: harden_linux_ntp is defined
   with_items:
     - "{{ harden_linux_ntp_settings | list }}"
-  tags:
-    - ntpd
+  tags: [ harden, ntpd, never ]
 
 - name: Add deploy user
   user:
@@ -75,8 +74,7 @@
     uid: "{{ harden_linux_deploy_user_uid }}"
     shell: "{{ harden_linux_deploy_user_shell }}"
     home: "{{ harden_linux_deploy_user_home }}"
-  tags:
-    - user
+  tags: [ harden, users, always ]
 
 - name: Add authorized keys for deploy user
   authorized_key:
@@ -85,8 +83,7 @@
   with_items:
     - "{{ harden_linux_deploy_user_public_keys }}"
   when: harden_linux_deploy_user_public_keys is defined
-  tags:
-    - user
+  tags: [ harden, users, always ]
 
 - name: Add deploy user to sudoers
   lineinfile:
@@ -94,9 +91,7 @@
     regexp: "{{ harden_linux_deploy_user }} ALL"
     line: "{{ harden_linux_deploy_user }} ALL=(ALL) NOPASSWD:ALL"
     state: present
-  tags:
-    - user
-    - sudo
+  tags: [ harden, users, always ]
 
 - name: Adjust APT update intervals
   copy:
@@ -105,14 +100,12 @@
     owner: root
     group: root
     mode: 0644
-  tags:
-    - apt
+  tags: [ harden, apt, always ]
 
 - name: Combine harden_linux_sshd_settings and harden_linux_sshd_settings_user (if defined)
   set_fact:
     harden_linux_sshd_settings: "{{ harden_linux_sshd_settings | combine(harden_linux_sshd_settings_user|default({})) }}"
-  tags:
-    - ssh
+  tags: [ harden, ssh, always ]
 
 - name: Ensure sshd_config setting
   lineinfile:
@@ -123,14 +116,12 @@
   notify: "restart ssh"
   with_items:
     - "{{ harden_linux_sshd_settings | list }}"
-  tags:
-    - ssh
+  tags: [ harden, ssh, always ]
 
 - name: Combine harden_linux_sysctl_settings and harden_linux_sysctl_settings_user (if defined)
   set_fact:
     harden_linux_sysctl_settings: "{{ harden_linux_sysctl_settings | combine(harden_linux_sysctl_settings_user|default({})) }}"
-  tags:
-    - sysctl
+  tags: [ harden, sysctl, always ]
 
 - name: Sysctl settings
   sysctl:
@@ -139,8 +130,7 @@
     sysctl_set: yes
   with_items:
     - "{{ harden_linux_sysctl_settings | list }}"
-  tags:
-    - sysctl
+  tags: [ harden, sysctl, always ]
 
 - name: Update Sshguard white list
   lineinfile:
@@ -150,13 +140,11 @@
     state: present
   with_items:
     - "{{ harden_linux_sshguard_whitelist }}"
-  tags:
-    - sshguard
+  tags: [ harden, ssh, always ]
 
 - name: Change root password
   user:
     name: "root"
     password: "{{ harden_linux_root_password }}"
   when: harden_linux_root_password is defined
-  tags:
-    - user
+  tags: [ harden, users, always ]
