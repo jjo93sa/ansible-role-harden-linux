@@ -40,32 +40,36 @@
   with_items: [ 'INPUT', 'FORWARD', 'OUTPUT' ]
   tags: [ harden, iptables, always ]
 
-- name: Install openntpd/ntp package if requested
-  apt:
+- name: Install ntp package as requested
+  package:
     state: present
     pkg: "{{ harden_linux_ntp }}"
   retries: 2
   delay: 5
   when: harden_linux_ntp is defined
-  tags: [ harden, ntpd, never ]
+  tags: [ harden, ntp, always ]
 
-- name: Set NTP config directory (depends on selected NTP package)
+- name: Set NTP config (depends on selected NTP package)
   set_fact:
-    harden_linux_ntp_config_directory: '{% if harden_linux_ntp == "openntpd" %}openntpd/{% else %}{% endif %}'
+    harden_linux_ntp_config: >-
+      {% if harden_linux_ntp == "openntpd" -%}/etc/openntpd/ntpd.conf
+      {% elif harden_linux_ntp == "ntpd" -%}/etc/ntpd.conf
+      {% elif harden_linux_ntp == "chrony" %}/etc/chrony/chrony.conf
+      {%- endif %}
   when: harden_linux_ntp is defined
-  tags: [ harden, ntpd, never ]
+  tags: [ harden, ntp, always ]
 
-- name: Add ntpd.conf if requested
+- name: Amend ntp configuration if requested
   lineinfile:
-    dest: "/etc/{{ harden_linux_ntp_config_directory }}ntpd.conf"
-    regexp: "{{ item }}"
-    line: "{{ harden_linux_ntp_settings[item] }}"
+    dest: "{{ harden_linux_ntp_config }}"
+    regexp: "{{ item.key }}"
+    line: "{{ item.value }}"
     state: "present"
-  notify: "restart ntpd"
+  notify: "restart ntp"
   when: harden_linux_ntp is defined
-  with_items:
-    - "{{ harden_linux_ntp_settings | list }}"
-  tags: [ harden, ntpd, never ]
+  with_dict:
+    - "{{ harden_linux_ntp_settings }}"
+  tags: [ harden, ntp, always ]
 
 - name: Add deploy user
   user:

@@ -9,7 +9,7 @@
     name: ssh
     state: restarted
 
-- name: restart ntpd
+- name: restart ntp
   service:
     name: "{{ harden_linux_ntp }}"
     state: restarted
