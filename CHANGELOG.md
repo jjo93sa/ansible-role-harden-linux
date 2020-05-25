@@ -1,9 +1,9 @@
 Changelog
 ---------
 
-**v4.0.2**
+**v4.0.3**
 
-- update README mentioning reinstalling wireguard-dkms package after kernel upgrade
+- Updated for Ubuntu 20.04 LTS
 
 **v4.0.1**
 
