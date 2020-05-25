@@ -76,6 +76,7 @@
     name: "{{ harden_linux_deploy_user }}"
     password: "{{ harden_linux_deploy_user_password }}"
     uid: "{{ harden_linux_deploy_user_uid }}"
+    groups: "{{ harden_linux_deploy_user_groups | default(omit) }}"
     shell: "{{ harden_linux_deploy_user_shell }}"
     home: "{{ harden_linux_deploy_user_home }}"
   tags: [ harden, users, always ]
@@ -117,6 +118,7 @@
     regexp: "{{ item }}"
     line: "{{ harden_linux_sshd_settings[item] }}"
     state: "present"
+    validate: '/usr/sbin/sshd -T -f %s'
   notify: "restart ssh"
   with_items:
     - "{{ harden_linux_sshd_settings | list }}"
