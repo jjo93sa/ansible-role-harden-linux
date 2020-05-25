@@ -96,6 +96,7 @@
     regexp: "{{ harden_linux_deploy_user }} ALL"
     line: "{{ harden_linux_deploy_user }} ALL=(ALL) NOPASSWD:ALL"
     state: present
+    validate: 'visudo -cf %s'
   tags: [ harden, users, always ]
 
 - name: Adjust APT update intervals
