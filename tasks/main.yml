@@ -28,6 +28,15 @@
   delay: 5
   tags: [ harden, apt, always ]
 
+- name: Purge excluded packages
+  apt:
+    state: absent
+    purge: yes
+    pkg: "{{ harden_linux_excluded_packages + harden_linux_excluded_packages_user | default([])  }}"
+  retries: 2
+  delay: 5
+  tags: [ harden, apt, always ]
+
 - import_role:
     name: ansible-role-iptables
   tags: [ harden, iptables, always ]
@@ -79,6 +88,8 @@
     groups: "{{ harden_linux_deploy_user_groups | default(omit) }}"
     shell: "{{ harden_linux_deploy_user_shell }}"
     home: "{{ harden_linux_deploy_user_home }}"
+    state: present
+    update_password: on_create
   tags: [ harden, users, always ]
 
 - name: Add authorized keys for deploy user
