@@ -1,0 +1,53 @@
+# Chrony configuration template for ansible-role-harden-linux
+
+# Add servers
+{% for item in harden_linux_ntp_servers %}
+{%   if item['options'] is not defined %}
+server {{ item['server'] }}
+{%   elif item['options'] is defined %}
+server {{ item['server'] }}{% for opt in item['options'] %} {{ opt['option'] }}{% if opt['val'] is defined %} {{ opt['val'] }}{% endif %}{% endfor %}
+
+{%   endif %}
+{% endfor %}
+
+# Add pools
+{% if harden_linux_ntp_pools is defined %}
+    {% for item in harden_linux_ntp_pools %}
+        {% if item['options'] is not defined %}
+            pool {{ item['pool'] }}
+        {% elif item['options'] is defined %}
+            pool {{ item['pool'] }}{% for opt in item['options'] %} {{ opt['option'] }}{% if opt['val'] is defined %} {{ opt['val'] }}{% endif %}{% endfor %}
+
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
+
+# This directive specify the location of the file containing ID/key pairs for
+# NTP authentication.
+keyfile {{ harden_linux_ntp_keyfile }}
+
+# This directive specify the file into which chronyd will store the rate
+# information.
+driftfile {{ harden_linux_ntp_driftfile }}
+
+# Uncomment the following line to turn logging on.
+#log tracking measurements statistics
+{% if harden_linux_ntp_logging is defined %}
+log {{ harden_linux_ntp_logging|join(' ') }}
+{% endif %}
+
+# Log files location.
+logdir {{ harden_linux_ntp_logfile }}
+
+# Stop bad estimates upsetting machine clock.
+maxupdateskew 100.0
+
+# This directive enables kernel synchronisation (every 11 minutes) of the
+# real-time clock. Note that it can’t be used along with the 'rtcfile' directive.
+rtcsync
+
+# Step the system clock instead of slewing it if the adjustment is larger than
+# one second, but only in the first three clock updates.
+makestep 1 3
+

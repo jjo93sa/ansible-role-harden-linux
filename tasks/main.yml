@@ -58,26 +58,16 @@
   when: harden_linux_ntp is defined
   tags: [ harden, ntp, always ]
 
-- name: Set NTP config (depends on selected NTP package)
-  set_fact:
-    harden_linux_ntp_config: >-
-      {% if harden_linux_ntp == "openntpd" -%}/etc/openntpd/ntpd.conf
-      {% elif harden_linux_ntp == "ntpd" -%}/etc/ntpd.conf
-      {% elif harden_linux_ntp == "chrony" %}/etc/chrony/chrony.conf
-      {%- endif %}
-  when: harden_linux_ntp is defined
-  tags: [ harden, ntp, always ]
-
-- name: Amend ntp configuration if requested
-  lineinfile:
+- name: Configure Chrony
+  template:
+    src: chrony.conf.j2
     dest: "{{ harden_linux_ntp_config }}"
-    regexp: "{{ item.key }}"
-    line: "{{ item.value }}"
-    state: "present"
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+  become: true
   notify: "restart ntp"
-  when: harden_linux_ntp is defined
-  with_dict:
-    - "{{ harden_linux_ntp_settings }}"
   tags: [ harden, ntp, always ]
 
 - name: Add deploy user
