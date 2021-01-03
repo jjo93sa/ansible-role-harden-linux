@@ -100,18 +100,14 @@ harden_linux_sshguard_whitelist:
   - "::1/128"
 
 harden_linux_ntp: "chrony"
-#harden_linux_ntp_pools:
-#  - pool: ntp.ubuntu.com
-#    options:
-#      - option: iburst
-#      - option: maxsources
-#        val: 4
-#  - pool: 0.ubuntu.pool.ntp.org
-#    options:
-#      - option: iburst
-#      - option: maxsources
-#        val: 1
+harden_linux_ntp_pools:
+  - pool: 0.ubuntu.pool.ntp.org
+    options:
+      - option: iburst
+      - option: maxsources
+        val: 4
 
+harden_linux_ntp_role: client
 harden_linux_ntp_servers:
   - server: bastion.poshboy.net
     options:

@@ -10,17 +10,31 @@ server {{ item['server'] }}{% for opt in item['options'] %} {{ opt['option'] }}{
 {%   endif %}
 {% endfor %}
 
-# Add pools
-{% if harden_linux_ntp_pools is defined %}
-    {% for item in harden_linux_ntp_pools %}
-        {% if item['options'] is not defined %}
-            pool {{ item['pool'] }}
-        {% elif item['options'] is defined %}
-            pool {{ item['pool'] }}{% for opt in item['options'] %} {{ opt['option'] }}{% if opt['val'] is defined %} {{ opt['val'] }}{% endif %}{% endfor %}
+##
+# If this is to be an NTP server
+#
+{% if harden_linux_ntp_role == "server" %}
+    # Add pools
+    {% if harden_linux_ntp_pools is defined %}
+        {% for item in harden_linux_ntp_pools %}
+            {% if item['options'] is not defined %}
+                pool {{ item['pool'] }}
+            {% elif item['options'] is defined %}
+                pool {{ item['pool'] }}{% for opt in item['options'] %} {{ opt['option'] }}{% if opt['val'] is defined %} {{ opt['val'] }}{% endif %}{% endfor %}
 
-        {% endif %}
-    {% endfor %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    # Add reclocks
+    refclock PPS /dev/pps0 lock NMEA
+    refclock SHM 0 offset 0.6 refid NMEA noselect
+
+    # Add client access
+    allow 10.10.10
 {% endif %}
+# End server section
+##
 
 
 # This directive specify the location of the file containing ID/key pairs for
