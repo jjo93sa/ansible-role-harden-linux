@@ -9,6 +9,8 @@ harden_linux_required_packages:
   - sudo
   - iptables-persistent
   - python3-pip
+  - git
+  - screen
 
 harden_linux_excluded_packages:
   - snapd
