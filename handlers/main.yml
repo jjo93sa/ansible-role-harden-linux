@@ -10,6 +10,6 @@
     state: restarted
 
 - name: restart ntp
-  service:
+  systemd:
     name: "{{ harden_linux_ntp }}"
     state: restarted

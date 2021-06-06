@@ -111,7 +111,11 @@ harden_linux_ntp_pools:
 
 harden_linux_ntp_role: client
 harden_linux_ntp_servers:
-  - server: bastion.poshboy.net
+  - server: wopr.poshboy.net
+    options:
+      - option: iburst
+      - option: prefer
+  - server: joshua.poshboy.net
     options:
       - option: iburst
       - option: prefer
@@ -123,3 +127,21 @@ harden_linux_ntp_logfile: /var/log/chrony
 #  - tracking
 #  - measurements
 #  - statistics
+
+harden_linux_op_version: "1.10.0"
+harden_linux_op_releases:
+  1.10.0:
+    x86_64:
+      checksum: "sha256:a55bf2d142481d8e15bf195db7263b7838acdd055812f14dd80ec827b903437e"
+      url: "https://cache.agilebits.com/dist/1P/op/pkg/v1.10.0/op_linux_amd64_v1.10.0.zip"
+    aarch64:
+      checksum: "sha256:ac1b417ccda790f02c3f8fcf91e5ec0d5fe2d0ab3b8e7457ece952ecd78a8bb5"
+      url: "https://cache.agilebits.com/dist/1P/op/pkg/v1.10.0/op_linux_arm_v1.10.0.zip"
+  1.8.0:
+    x86_64:
+      checksum: "sha256:4f257af9eeeca5d40d099e76e30322afbb44b0d34c052ec4fe3378deadefee68"
+      url: "https://cache.agilebits.com/dist/1P/op/pkg/v1.8.0/op_linux_amd64_v1.8.0.zip"
+    aarch64:
+      checksum: "sha256:85dc0dd86eff1fe99715667edadb7be8aab11d42efe66a4096cd995198f1d830"
+      url: "https://cache.agilebits.com/dist/1P/op/pkg/v1.8.0/op_linux_arm_v1.8.0.zip"
+

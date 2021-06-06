@@ -161,12 +161,14 @@
   when: harden_linux_root_password is defined
   tags: [ harden, users, always ]
 
+- debug:
+    msg: "{{ harden_linux_op_releases[harden_linux_op_version][ansible_architecture].url }}"
+
 - name: Download 1Password CLI
   get_url:
-    url: "https://cache.agilebits.com/dist/1P/op/pkg/v1.8.0/op_linux_amd64_v1.8.0.zip"
+    url: "{{ harden_linux_op_releases[harden_linux_op_version][ansible_architecture].url }}"
     dest: /tmp/
-    checksum: "sha256:4f257af9eeeca5d40d099e76e30322afbb44b0d34c052ec4fe3378deadefee68"
-  when: ansible_architecture == "x86_64"
+    checksum: "{{ harden_linux_op_releases[harden_linux_op_version][ansible_architecture].checksum }}"
   register: get_result
   tags: [ 1password, always ]
 
@@ -179,24 +181,42 @@
   when: get_result.dest is defined
   tags: [ 1password, always ]
 
-- name: Download 1Password CLI
-  get_url:
-    url: "https://cache.agilebits.com/dist/1P/op/pkg/v1.8.0/op_linux_arm_v1.8.0.zip"
-    dest: /tmp/
-    checksum: "sha256:85dc0dd86eff1fe99715667edadb7be8aab11d42efe66a4096cd995198f1d830"
-  when: ansible_architecture == "aarch64"
-  register: get_result
-  tags: [ 1password, always ]
-
-- debug:
-    var: get_result
-
-- name: Get location of 1Password archive
-  set_fact:
-    op_dest: "{{ get_result.dest }}"
-  when: get_result.dest is defined
-  tags: [ 1password, always ]
-
+#- name: Download 1Password CLI
+#  get_url:
+#    url: "https://cache.agilebits.com/dist/1P/op/pkg/v1.8.0/op_linux_amd64_v1.8.0.zip"
+#    dest: /tmp/
+#    checksum: "sha256:4f257af9eeeca5d40d099e76e30322afbb44b0d34c052ec4fe3378deadefee68"
+#  when: ansible_architecture == "x86_64"
+#  register: get_result
+#  tags: [ 1password, always ]
+#
+#- debug:
+#    var: get_result
+#
+#- name: Get location of 1Password archive
+#  set_fact:
+#    op_dest: "{{ get_result.dest }}"
+#  when: get_result.dest is defined
+#  tags: [ 1password, always ]
+#
+#- name: Download 1Password CLI
+#  get_url:
+#    url: "https://cache.agilebits.com/dist/1P/op/pkg/v1.8.0/op_linux_arm_v1.8.0.zip"
+#    dest: /tmp/
+#    checksum: "sha256:85dc0dd86eff1fe99715667edadb7be8aab11d42efe66a4096cd995198f1d830"
+#  when: ansible_architecture == "aarch64"
+#  register: get_result
+#  tags: [ 1password, always ]
+#
+#- debug:
+#    var: get_result
+#
+#- name: Get location of 1Password archive
+#  set_fact:
+#    op_dest: "{{ get_result.dest }}"
+#  when: get_result.dest is defined
+#  tags: [ 1password, always ]
+#
 - debug:
     var: op_dest
 
